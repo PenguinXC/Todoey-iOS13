@@ -19,19 +19,18 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         
         debugPrint("didFinishLaunchingWithOptions")
         
-        
-        debugPrint(NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true).last as String? ?? "Could not find document directory")
-        // iPhone: "/var/mobile/Containers/Data/Application/01922EA9-9114-4059-BD65-8985BAB4914F/Documents"
-        // My Mac (Designed for iPad): "/Users/vuna/Library/Containers/290517DA-0064-46C4-8B76-843694654D14/Data/Documents"
-        // I want to print contents of the document directory
-        let fileManager = FileManager.default
-        let documentDirectory = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true).last!
-        do {
-            let contents = try fileManager.contentsOfDirectory(atPath: documentDirectory)
-            print("Contents of the document directory: \(contents)")
-        } catch {
-            print("Error while enumerating files \(documentDirectory): \(error.localizedDescription)")
-        }
+//        debugPrint(NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true).last as String? ?? "Could not find document directory")
+//        // iPhone: "/var/mobile/Containers/Data/Application/01922EA9-9114-4059-BD65-8985BAB4914F/Documents"
+//        // My Mac (Designed for iPad): "/Users/vuna/Library/Containers/290517DA-0064-46C4-8B76-843694654D14/Data/Documents"
+//        // I want to print contents of the document directory
+//        let fileManager = FileManager.default
+//        let documentDirectory = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true).last!
+//        do {
+//            let contents = try fileManager.contentsOfDirectory(atPath: documentDirectory)
+//            print("Contents of the document directory: \(contents)")
+//        } catch {
+//            print("Error while enumerating files \(documentDirectory): \(error.localizedDescription)")
+//        }
         
         return true
     }

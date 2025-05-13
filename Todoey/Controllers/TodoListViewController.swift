@@ -12,11 +12,13 @@ class TodoListViewController: UITableViewController {
     
     // var itemArray = ["Find Mike", "Buy Eggos", "Destroy Demogorgon", "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s"]
     var itemArray = [Item]()
-    
-    let defaults = UserDefaults.standard
+    let dataFilePath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("Items.plist")
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        
+        print(dataFilePath)
         
         let newItem = Item()
         newItem.title = "Find Mike"
@@ -25,14 +27,14 @@ class TodoListViewController: UITableViewController {
         let newItem2 = Item()
         newItem2.title = "Buy Eggos"
         itemArray.append(newItem2)
-
+        
         let newItem3 = Item()
         newItem3.title = "Destroy Demogorgon"
         itemArray.append(newItem3)
-
-        if let items = defaults.array(forKey: "TodoListArray") as? [Item] {
-            itemArray = items
-        }
+        
+        //        if let items = defaults.array(forKey: "TodoListArray") as? [Item] {
+        //            itemArray = items
+        //        }
     }
     
     // MARK: - TableView Datasource Methods
@@ -64,23 +66,15 @@ class TodoListViewController: UITableViewController {
     // MARK: - TableView Delegate Methods
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         
-//        if tableView.cellForRow(at: indexPath)?.accessoryType == .checkmark {
-//            // If the cell is already checked, uncheck it
-//            tableView.cellForRow(at: indexPath)?.accessoryType = .none
-//        } else {
-//            // If the cell is not checked, check it
-//            tableView.cellForRow(at: indexPath)?.accessoryType = .checkmark
-//        }
         itemArray[indexPath.row].done = !itemArray[indexPath.row].done
         
-        tableView.reloadData()
+        saveItems()
         
         // Deselect (remove highlight) the cell after a short delay
         tableView.deselectRow(at: indexPath, animated: true)
         
     }
     
-    // MARK: - Add New Items
     @IBAction func addButtonPressed(_ sender: UIBarButtonItem) {
         
         // The idea is for this textField to be displayed in the alert
@@ -96,7 +90,7 @@ class TodoListViewController: UITableViewController {
             newItem.title = textField.text!
             self.itemArray.append(newItem)
             
-            self.defaults.set(self.itemArray, forKey: "TodoListArray")
+            self.saveItems()
             
             // Reload the table view to display the new item
             self.tableView.reloadData()
@@ -110,11 +104,26 @@ class TodoListViewController: UITableViewController {
             print(alertTextField.text!)
             print("Now")
         }
-
+        
         // Add the "Add Item" button to the alert
         alert.addAction(action)
         
         // present the alert to the user
         present(alert, animated: true, completion: nil)
     }
+    
+    // MARK: - Model Manipulation Methods
+    fileprivate func saveItems() {
+        
+        let encoder = PropertyListEncoder()
+        
+        do {
+            let data = try encoder.encode(self.itemArray)
+            try data.write(to: self.dataFilePath!)
+        } catch {
+            print("Error encoding item array, \(error)")
+        }
+        tableView.reloadData()
+    }
+    
 }
