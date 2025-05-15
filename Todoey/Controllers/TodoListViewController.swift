@@ -13,7 +13,6 @@ class TodoListViewController: UITableViewController {
     
     // var itemArray = ["Find Mike", "Buy Eggos", "Destroy Demogorgon", "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s"]
     var itemArray = [Item]()
-    let dataFilePath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("Items.plist")
     // UIApplication.shared is a singleton object that represents the current application
     // UIApplication.shared.delegate is used to access the app delegate,
     // which is a singleton object that manages the app's lifecycle and shared resources
@@ -22,7 +21,8 @@ class TodoListViewController: UITableViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        debugPrint(dataFilePath!)
+        // '/Users/vuna/Library/Developer/CoreSimulator/Devices/B25FD894-26DD-467E-A9B2-0BD44E97C99B/data/Containers/Data/Application/31DF81FC-B8A9-4EF5-A6E2-BC8E44D1ABDD/Library/Application Support/DataModel.sqlite'
+        debugPrint(FileManager.default.urls(for: .documentDirectory, in: .userDomainMask))
         
         // loadItems()
     }
