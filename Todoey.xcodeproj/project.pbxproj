@@ -89,9 +89,9 @@
 		EB2BE4F8239524DB00FB933B /* Todoey */ = {
 			isa = PBXGroup;
 			children = (
+				A361BDB92DD30568003BB7A9 /* Controllers */,
 				A361BDB52DD30446003BB7A9 /* Data Model */,
 				EB2BE4F9239524DB00FB933B /* AppDelegate.swift */,
-				A361BDB92DD30568003BB7A9 /* Controllers */,
 				A361BDB82DD3055A003BB7A9 /* Views */,
 				A361BDBA2DD30585003BB7A9 /* Supporting Files */,
 				EB2BE507239524DC00FB933B /* Info.plist */,

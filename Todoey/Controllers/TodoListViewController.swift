@@ -77,6 +77,7 @@ class TodoListViewController: UITableViewController {
         let action = UIAlertAction(title: "Add Item", style: .default) { (action) in
             // What will happen once the user clicks the Add Item button on our
             
+            // We are creating a new item inside the context, it is not saved into the database yet
             let newItem = Item(context: self.context)
             newItem.title = textField.text!
             newItem.done = false
@@ -108,6 +109,7 @@ class TodoListViewController: UITableViewController {
     fileprivate func saveItems() {
         
         do {
+            // Saving the context will save the new item to the database
             try context.save()
         } catch {
             print("Error saving context: \(error)")
