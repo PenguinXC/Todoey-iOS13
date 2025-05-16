@@ -124,10 +124,9 @@ class TodoListViewController: UITableViewController {
         tableView.reloadData()
     }
     
-    fileprivate func loadItems() {
-        
+    fileprivate func loadItems(with request: NSFetchRequest<Item> = Item.fetchRequest()) {
         // The request for the Item entity is used as a parameter, it is a prototype of what the data will look like
-        let request: NSFetchRequest<Item> = Item.fetchRequest()
+        
         do {
             // The fetch request is used to retrieve data from the persistent store when calling the fetch method on the context like below
             itemArray = try context.fetch(request)
@@ -135,4 +134,23 @@ class TodoListViewController: UITableViewController {
             print("Error fetching data from context \(error)")
         }
     }
+    
 }
+
+// MARK: - Search Bar methods
+extension TodoListViewController: UISearchBarDelegate {
+    
+    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+        
+        let request: NSFetchRequest<Item> = Item.fetchRequest()
+        
+        // The predicate is used to filter the data based on the search text
+        request.predicate = NSPredicate(format: "title CONTAINS[cd] %@", searchBar.text!)
+        
+        // The sort descriptor is used to sort the data based on the title property
+        request.sortDescriptors = [NSSortDescriptor(key: "title", ascending: true)]
+        
+        loadItems(with: request)
+    }
+}
+
