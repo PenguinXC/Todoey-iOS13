@@ -24,7 +24,8 @@ class TodoListViewController: UITableViewController {
         // '/Users/vuna/Library/Developer/CoreSimulator/Devices/B25FD894-26DD-467E-A9B2-0BD44E97C99B/data/Containers/Data/Application/31DF81FC-B8A9-4EF5-A6E2-BC8E44D1ABDD/Library/Application Support/DataModel.sqlite'
         debugPrint(FileManager.default.urls(for: .documentDirectory, in: .userDomainMask))
         
-        // loadItems()
+        // Load the items from database when start the app to populate the itemArray
+        loadItems()
     }
     
     // MARK: - TableView Datasource Methods
@@ -117,15 +118,15 @@ class TodoListViewController: UITableViewController {
         tableView.reloadData()
     }
     
-//    fileprivate func loadItems() {
-//        if let data = try? Data(contentsOf: dataFilePath!) {
-//            let decoder = PropertyListDecoder()
-//            // [Item].self means that we want to pass the type of the array of Item objects
-//            do {
-//                itemArray = try decoder.decode([Item].self, from: data)
-//            } catch {
-//                print("Error decoding item array, \(error)")
-//            }
-//        }
-//    }
+    fileprivate func loadItems() {
+        
+        // The request for the Item entity is used as a parameter, it is a prototype of what the data will look like
+        let request: NSFetchRequest<Item> = Item.fetchRequest()
+        do {
+            // The fetch request is used to retrieve data from the persistent store when calling the fetch method on the context like below
+            itemArray = try context.fetch(request)
+        } catch {
+            print("Error fetching data from context \(error)")
+        }
+    }
 }
