@@ -57,7 +57,12 @@ class TodoListViewController: UITableViewController {
     // MARK: - TableView Delegate Methods
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         
-        itemArray[indexPath.row].done = !itemArray[indexPath.row].done
+        // itemArray[indexPath.row].done = !itemArray[indexPath.row].done
+        // Order matters, so we need to set the done property first
+        // We need to delete the item from the database first
+        // context.delete(itemArray[indexPath.row])
+        // then remove it from the array
+        // itemArray.remove(at: indexPath.row)
         
         // Save the updated item to the database
         saveItems()
