@@ -59,6 +59,7 @@ class TodoListViewController: UITableViewController {
         
         itemArray[indexPath.row].done = !itemArray[indexPath.row].done
         
+        // Save the updated item to the database
         saveItems()
         
         // Deselect (remove highlight) the cell after a short delay
