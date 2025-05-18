@@ -133,15 +133,19 @@ class TodoListViewController: UITableViewController {
         } catch {
             print("Error fetching data from context \(error)")
         }
+        
+        tableView.reloadData()
     }
     
 }
 
 // MARK: - Search Bar methods
+
 extension TodoListViewController: UISearchBarDelegate {
     
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
         
+        // This method is called when the user clicks the search button on the keyboard
         let request: NSFetchRequest<Item> = Item.fetchRequest()
         
         // The predicate is used to filter the data based on the search text
@@ -152,5 +156,20 @@ extension TodoListViewController: UISearchBarDelegate {
         
         loadItems(with: request)
     }
+    
+    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+        // If the search text is empty, reload the original data
+        if searchBar.text?.count == 0 {
+            loadItems()
+            
+            // DispatchQueue is like a manager that assigns tasks to different threads
+            // Calling DispatchQueue.main.async to ensure that the UI updates are performed on the main thread
+            // UI updates should always be done on the main thread
+            DispatchQueue.main.async {
+                // This will make the search bar resign first responder status and dismiss the keyboard
+                // The first responder is the object that is currently receiving input events (is the active text field)
+                searchBar.resignFirstResponder()
+            }
+        }
+    }
 }
-
