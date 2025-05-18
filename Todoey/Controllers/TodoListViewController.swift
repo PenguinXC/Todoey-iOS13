@@ -11,7 +11,6 @@ import CoreData
 
 class TodoListViewController: UITableViewController {
     
-    // var itemArray = ["Find Mike", "Buy Eggos", "Destroy Demogorgon", "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s"]
     var itemArray = [Item]()
     // UIApplication.shared is a singleton object that represents the current application
     // UIApplication.shared.delegate is used to access the app delegate,
@@ -29,6 +28,7 @@ class TodoListViewController: UITableViewController {
     }
     
     // MARK: - TableView Datasource Methods
+    
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return itemArray.count
     }
@@ -42,6 +42,7 @@ class TodoListViewController: UITableViewController {
         // Create a new cell with prototype cell identifier "ToDoItemCell"
         let cell = tableView.dequeueReusableCell(withIdentifier: "ToDoItemCell", for: indexPath)
         
+        // Get the item from the itemArray at the current indexPath
         let item = itemArray[indexPath.row]
         
         // Configure the cell with the item from the itemArray at the current indexPath
@@ -55,6 +56,7 @@ class TodoListViewController: UITableViewController {
     }
     
     // MARK: - TableView Delegate Methods
+    
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         
         // itemArray[indexPath.row].done = !itemArray[indexPath.row].done
@@ -74,26 +76,24 @@ class TodoListViewController: UITableViewController {
     
     @IBAction func addButtonPressed(_ sender: UIBarButtonItem) {
         
-        // The idea is for this textField to be displayed in the alert
+        // User input will be taken from the alertTextField, but since we need to access it outside the closure, we need to declare another variable (textField) outside the closure
         var textField = UITextField()
         
         // UIAlertController will be used to display an alert with a text field for the user to enter a new item
         // This code designs the alert
         let alert = UIAlertController(title: "Add New Todoey Item", message: "", preferredStyle: .alert)
         
+        // The code of this action will be executed when the user clicks the button on our alert
         let action = UIAlertAction(title: "Add Item", style: .default) { (action) in
-            // What will happen once the user clicks the Add Item button on our
-            
             // We are creating a new item inside the context, it is not saved into the database yet
             let newItem = Item(context: self.context)
             newItem.title = textField.text!
             newItem.done = false
             self.itemArray.append(newItem)
             
+            // Save the updated item to the database
             self.saveItems()
             
-            // Reload the table view to display the new item
-            self.tableView.reloadData()
         }
         
         alert.addTextField { (alertTextField) in
@@ -101,11 +101,11 @@ class TodoListViewController: UITableViewController {
             alertTextField.placeholder = "Create new item"
             textField = alertTextField
             
-            print(alertTextField.text!)
-            print("Now")
+            debugPrint(alertTextField.text!)
+            debugPrint("Now")
         }
         
-        // Add the "Add Item" button to the alert
+        // Add the "Add Item" button to the alert, defined by the action above
         alert.addAction(action)
         
         // present the alert to the user
@@ -113,6 +113,7 @@ class TodoListViewController: UITableViewController {
     }
     
     // MARK: - Model Manipulation Methods
+    
     fileprivate func saveItems() {
         
         do {
