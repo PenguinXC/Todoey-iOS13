@@ -12,6 +12,15 @@ import CoreData
 class TodoListViewController: UITableViewController {
     
     var itemArray = [Item]()
+    var selectedCategory: Category? {
+        // Everything inside didSet will be executed when the selectedCategory is set with a new value
+        didSet {
+            // Load the items from database when the selected category is set
+            // We only call the loadItems method here, because it is certain that the selectedCategory is set before this method is called
+            loadItems()
+        }
+    }
+    
     // UIApplication.shared is a singleton object that represents the current application
     // UIApplication.shared.delegate is used to access the app delegate,
     // which is a singleton object that manages the app's lifecycle and shared resources
@@ -22,9 +31,6 @@ class TodoListViewController: UITableViewController {
         
         // '/Users/vuna/Library/Developer/CoreSimulator/Devices/B25FD894-26DD-467E-A9B2-0BD44E97C99B/data/Containers/Data/Application/31DF81FC-B8A9-4EF5-A6E2-BC8E44D1ABDD/Library/Application Support/DataModel.sqlite'
         debugPrint(FileManager.default.urls(for: .documentDirectory, in: .userDomainMask))
-        
-        // Load the items from database when start the app to populate the itemArray
-        loadItems()
     }
     
     // MARK: - TableView Datasource Methods
@@ -89,6 +95,8 @@ class TodoListViewController: UITableViewController {
             let newItem = Item(context: self.context)
             newItem.title = textField.text!
             newItem.done = false
+            newItem.parentCategory = self.selectedCategory
+            
             self.itemArray.append(newItem)
             
             // Save the updated item to the database
@@ -125,8 +133,16 @@ class TodoListViewController: UITableViewController {
         tableView.reloadData()
     }
     
-    fileprivate func loadItems(with request: NSFetchRequest<Item> = Item.fetchRequest()) {
+    fileprivate func loadItems(with request: NSFetchRequest<Item> = Item.fetchRequest(), predicate: NSPredicate? = nil) {
         // The request for the Item entity is used as a parameter, it is a prototype of what the data will look like
+        
+        let categoryPredicate = NSPredicate(format: "parentCategory.name MATCHES %@", selectedCategory!.name!)
+        
+        if let additionalPredicate = predicate {
+            request.predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [categoryPredicate, additionalPredicate])
+        } else {
+            request.predicate = categoryPredicate
+        }
         
         do {
             // The fetch request is used to retrieve data from the persistent store when calling the fetch method on the context like below
@@ -155,7 +171,7 @@ extension TodoListViewController: UISearchBarDelegate {
         // The sort descriptor is used to sort the data based on the title property
         request.sortDescriptors = [NSSortDescriptor(key: "title", ascending: true)]
         
-        loadItems(with: request)
+        loadItems(with: request, predicate: request.predicate)
     }
     
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
