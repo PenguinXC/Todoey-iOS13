@@ -17,6 +17,40 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     
     var window: UIWindow?
     
+    // Updated with lazy initialization to ensure encryption is set up properly
+    static var config: Realm.Configuration = {
+        let userDefaults = UserDefaults.standard
+        var key = Foundation.Data(count: 64)
+        
+        // Try to retrieve existing key from UserDefaults
+        if let keyInUserDefaults = userDefaults.string(forKey: "realmEncryptionKey"),
+           let binaryKey = Foundation.Data(hexString: keyInUserDefaults) {
+            print("Using existing encryption key from UserDefaults")
+            key = binaryKey
+        } else {
+            // Generate new key if none exists
+            print("Generating new encryption key")
+            key = Foundation.Data(count: 64)
+            let status = key.withUnsafeMutableBytes { pointer in
+                guard let baseAddress = pointer.baseAddress else {
+                    fatalError("Failed to obtain base address")
+                }
+                return SecRandomCopyBytes(kSecRandomDefault, 64, baseAddress)
+            }
+            
+            if status != errSecSuccess {
+                fatalError("Failed to generate random bytes: \(status)")
+            }
+            
+            // Save key to UserDefaults
+            let hexKey = key.map { String(format: "%02hhx", $0) }.joined()
+            userDefaults.set(hexKey, forKey: "realmEncryptionKey")
+            print("Saved new encryption key to UserDefaults")
+        }
+        
+        // Create and return configuration with encryption key
+        return Realm.Configuration(encryptionKey: key)
+    }()
     
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
@@ -47,12 +81,16 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         } else {
             debugPrint("Key does not exist in user defaults")
             // Generate a random encryption key
-            var key = Foundation.Data(count: 64)
-            key.withUnsafeMutableBytes { (pointer: UnsafeMutableRawBufferPointer) in
+            key = Foundation.Data(count: 64)
+            let status = key.withUnsafeMutableBytes { (pointer: UnsafeMutableRawBufferPointer) in
                 guard let baseAddress = pointer.baseAddress else {
                     fatalError("Failed to obtain base address")
                 }
-                SecRandomCopyBytes(kSecRandomDefault, 64, baseAddress)
+                return SecRandomCopyBytes(kSecRandomDefault, 64, baseAddress)
+            }
+            
+            if status != errSecSuccess {
+                fatalError("Failed to generate random bytes: \(status)")
             }
             
             let hexKey = key.map { String(format: "%02hhx", $0) }.joined()
@@ -65,19 +103,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // Initialize Realm
         // Add the encryption key to the config and open the realm
         let config = Realm.Configuration(encryptionKey: key)
+        AppDelegate.config = config
         
         // Print the path to the Realm file
         debugPrint("Realm file path: \(Realm.Configuration.defaultConfiguration.fileURL!)")
         
-        let data = Data()
-        data.name = "VuNA"
-        data.age = 25
-        
         do{
             let realm = try Realm(configuration: config)
-            try realm.write {
-                realm.add(data)
-            }
         } catch {
             print("Error initializing Realm, \(error)")
         }
@@ -86,7 +118,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
     
     func applicationWillResignActive(_ application: UIApplication) {
-        // Sent when the application is about to move from active to inactive state. This can occur for certain types of temporary interruptions (such as an incoming phone call or SMS message) or when the user quits the application and it begins the transition to the background state.
+        // Sent when the application is about to move from active to inactive state. This can occur for certain types of temporary interruptions (such as an incoming phone call or SMS message) or when the user quits and it begins the transition to the background state.
         // Use this method to pause ongoing tasks, disable timers, and throttle down OpenGL ES frame rates. Games should use this method to pause the game.
     }
     
@@ -170,7 +202,7 @@ extension Foundation.Data {
             let j = hexString.index(hexString.startIndex, offsetBy: i*2)
             let k = hexString.index(j, offsetBy: 2)
             let bytes = hexString[j..<k]
-            if var num = UInt8(bytes, radix: 16) {
+            if let num = UInt8(bytes, radix: 16) {
                 data.append(num)
             } else {
                 return nil

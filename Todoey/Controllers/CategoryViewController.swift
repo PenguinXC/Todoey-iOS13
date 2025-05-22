@@ -7,20 +7,25 @@
 //
 
 import UIKit
-import CoreData
+import RealmSwift
 
 class CategoryViewController: UITableViewController {
+    
     
     var categories = [Category]()
     
     let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
+    
+    // The first time when you create the realm instance, it can fail if the resource is not available
+    // In practice, failing to create a realm instance only happens at the first time
+    let realm = try! Realm(configuration: AppDelegate.config)
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
         // [file:///Users/vuna/Library/Developer/CoreSimulator/Devices/B25FD894-26DD-467E-A9B2-0BD44E97C99B/data/Containers/Data/Application/B2C0EF36-9138-480C-890E-5D3B17A22BF0/Documents/]
         debugPrint(FileManager.default.urls(for: .documentDirectory, in: .userDomainMask))
-
+        
         loadCategories()
     }
     
@@ -48,24 +53,26 @@ class CategoryViewController: UITableViewController {
     
     // MARK: - Data Manipulation Methods
     
-    func saveCategories() {
+    func save(category: Category) {
         do {
-            try context.save()
+            try realm.write {
+                realm.add(category)
+            }
         } catch {
             print("Error saving context \(error)")
         }
         tableView.reloadData()
     }
     
-    func loadCategories(with request: NSFetchRequest<Category> = Category.fetchRequest()) {
+    func loadCategories() {
         
-        do {
-            categories = try context.fetch(request)
-        } catch {
-            print("Error fetching data from context \(error)")
-            
-        }
-        tableView.reloadData()
+//        do {
+//            categories = try context.fetch(request)
+//        } catch {
+//            print("Error fetching data from context \(error)")
+//            
+//        }
+//        tableView.reloadData()
     }
     
     // MARK: - Navigation
@@ -99,12 +106,12 @@ class CategoryViewController: UITableViewController {
         // The code of this action will be executed when the user clicks the Add Category button on our alert
         let action = UIAlertAction(title: "Add Category", style: .default) { (action) in
             // We are creating a new category inside the context, it is not saved into the database yet
-            let newCategory = Category(context: self.context)
+            let newCategory = Category()
             newCategory.name = textField.text!
             self.categories.append(newCategory)
             
             // Save the new category to the database
-            self.saveCategories()
+            self.save(category: newCategory)
         }
         
         // Add a text field to the alert
