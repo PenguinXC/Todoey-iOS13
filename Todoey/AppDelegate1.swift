@@ -13,44 +13,12 @@ import RealmSwift
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
     
-    let userDefaults = UserDefaults.standard
-    
     var window: UIWindow?
     
-    // Updated with lazy initialization to ensure encryption is set up properly
-    static var config: Realm.Configuration = {
-        let userDefaults = UserDefaults.standard
-        var key: Foundation.Data
-        
-        // Try to retrieve existing key from UserDefaults
-        if let keyHexInUserDefaults = userDefaults.string(forKey: "realmEncryptionKey"),
-           let keyBinary = Foundation.Data(hexString: keyHexInUserDefaults) {
-            debugPrint("Using existing encryption key from UserDefaults")
-            key = keyBinary
-        } else {
-            // Generate new key if none exists
-            debugPrint("Generating new encryption key")
-            key = Foundation.Data(count: 64)
-            let status = key.withUnsafeMutableBytes { pointer in
-                guard let baseAddress = pointer.baseAddress else {
-                    fatalError("Failed to obtain base address")
-                }
-                return SecRandomCopyBytes(kSecRandomDefault, 64, baseAddress)
-            }
-            
-            if status != errSecSuccess {
-                fatalError("Failed to generate random bytes: \(status)")
-            }
-            
-            // Save key to UserDefaults
-            let hexKey = key.map { String(format: "%02hhx", $0) }.joined()
-            userDefaults.set(hexKey, forKey: "realmEncryptionKey")
-            print("Saved new encryption key to UserDefaults")
-        }
-        
-        // Create and return configuration with encryption key
-        return Realm.Configuration(encryptionKey: key)
-    }()
+    // For backward compatibility with existing code
+    static var config: Realm.Configuration {
+        return RealmManager.configuration
+    }
     
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
@@ -71,9 +39,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // Print the path to the Realm file
         debugPrint("Realm file path: \(Realm.Configuration.defaultConfiguration.fileURL!)")
         
-        // Test the configuration (using the already initialized config from static property)
+        // Test the configuration (using RealmManager)
         do {
-            let realm = try Realm(configuration: AppDelegate.config)
+            let realm = RealmManager.getRealm()
             debugPrint("Successfully opened encrypted Realm")
         } catch {
             print("Error initializing Realm, \(error)")
@@ -137,8 +105,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         })
         return container
     }()
-    // Core Data path:
-    // /Users/vuna/Library/Developer/Xcode/DerivedData/Todoey-furobhpizqiwzyfoauncztntfqgo/Build/Intermediates.noindex/Todoey.build/Debug-iphonesimulator/Todoey.build/DerivedSources/CoreDataGenerated/DataModel
     
     // MARK: - Core Data Saving support
     
@@ -154,25 +120,5 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 fatalError("Unresolved error \(nserror), \(nserror.userInfo)")
             }
         }
-    }
-}
-
-// Extension to add hex string conversion
-// This extension adds a method to convert a hex string to Foundation.Data
-extension Foundation.Data {
-    init?(hexString: String) {
-        let len = hexString.count / 2
-        var data = Foundation.Data(capacity: len)
-        for i in 0..<len {
-            let j = hexString.index(hexString.startIndex, offsetBy: i*2)
-            let k = hexString.index(j, offsetBy: 2)
-            let bytes = hexString[j..<k]
-            if let num = UInt8(bytes, radix: 16) {
-                data.append(num)
-            } else {
-                return nil
-            }
-        }
-        self = data
     }
 }
