@@ -111,6 +111,8 @@ class TodoListViewController: UITableViewController {
                         newItem.title = textField.text!
                         // newItem.done = false does not need to be set, because it is already set to false by default
                         // Set the parentCategory of the new item to the selectedCategory
+                        
+                        newItem.dateCreated = Date()
                         // This is not necessary, because the parentCategory is set automatically when we append the new item to the items array of the selectedCategory
                         currentCategory.items.append(newItem)
                         // Add the new item to the realm database, transaction is committed automatically
@@ -154,35 +156,28 @@ class TodoListViewController: UITableViewController {
 
 // MARK: - Search Bar methods
 
-//extension TodoListViewController: UISearchBarDelegate {
-//
-//    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
-//
-//        // This method is called when the user clicks the search button on the keyboard
-//        let request: NSFetchRequest<Item> = Item.fetchRequest()
-//
-//        // The predicate is used to filter the data based on the search text
-//        request.predicate = NSPredicate(format: "title CONTAINS[cd] %@", searchBar.text!)
-//
-//        // The sort descriptor is used to sort the data based on the title property
-//        request.sortDescriptors = [NSSortDescriptor(key: "title", ascending: true)]
-//
-//        loadItems(with: request, predicate: request.predicate)
-//    }
-//
-//    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
-//        // If the search text is empty, reload the original data
-//        if searchBar.text?.count == 0 {
-//            loadItems()
-//
-//            // DispatchQueue is like a manager that assigns tasks to different threads
-//            // Calling DispatchQueue.main.async to ensure that the UI updates are performed on the main thread
-//            // UI updates should always be done on the main thread
-//            DispatchQueue.main.async {
-//                // This will make the search bar resign first responder status and dismiss the keyboard
-//                // The first responder is the object that is currently receiving input events (is the active text field)
-//                searchBar.resignFirstResponder()
-//            }
-//        }
-//    }
-//}
+extension TodoListViewController: UISearchBarDelegate {
+
+    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+        
+        todoItems = todoItems?.filter("title CONTAINS[cd] %@", searchBar.text!).sorted(byKeyPath: "dateCreated", ascending: true)
+        
+        tableView.reloadData()
+    }
+
+    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+        // If the search text is empty, reload the original data
+        if searchBar.text?.count == 0 {
+            loadItems()
+
+            // DispatchQueue is like a manager that assigns tasks to different threads
+            // Calling DispatchQueue.main.async to ensure that the UI updates are performed on the main thread
+            // UI updates should always be done on the main thread
+            DispatchQueue.main.async {
+                // This will make the search bar resign first responder status and dismiss the keyboard
+                // The first responder is the object that is currently receiving input events (is the active text field)
+                searchBar.resignFirstResponder()
+            }
+        }
+    }
+}

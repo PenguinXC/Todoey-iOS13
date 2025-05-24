@@ -26,6 +26,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         if let keyHexInUserDefaults = userDefaults.string(forKey: "realmEncryptionKey"),
            let keyBinary = Foundation.Data(hexString: keyHexInUserDefaults) {
             debugPrint("Using existing encryption key from UserDefaults")
+            debugPrint("Existing encryption key: \(keyHexInUserDefaults)")
             key = keyBinary
         } else {
             // Generate new key if none exists
@@ -45,7 +46,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             // Save key to UserDefaults
             let hexKey = key.map { String(format: "%02hhx", $0) }.joined()
             userDefaults.set(hexKey, forKey: "realmEncryptionKey")
-            print("Saved new encryption key to UserDefaults")
+            debugPrint("Saved new encryption key to UserDefaults")
+            debugPrint("New encryption key: \(hexKey)")
         }
         
         // Create and return configuration with encryption key
