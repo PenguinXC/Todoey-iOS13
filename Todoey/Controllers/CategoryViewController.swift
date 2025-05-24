@@ -8,6 +8,7 @@
 
 import UIKit
 import RealmSwift
+import SwipeCellKit
 
 class CategoryViewController: UITableViewController {
     
@@ -23,6 +24,8 @@ class CategoryViewController: UITableViewController {
         // [file:///Users/vuna/Library/Developer/CoreSimulator/Devices/B25FD894-26DD-467E-A9B2-0BD44E97C99B/data/Containers/Data/Application/B2C0EF36-9138-480C-890E-5D3B17A22BF0/Documents/]
         
         loadCategories()
+        
+        tableView.rowHeight = 80.0
     }
     
     // MARK: - TableView Datasource Methods
@@ -33,16 +36,24 @@ class CategoryViewController: UITableViewController {
         return categories?.count ?? 1
     }
     
+//    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+//        let cell = tableView.dequeueReusableCell(withIdentifier: "Cell") as! SwipeTableViewCell
+//        cell.delegate = self
+//        return cell
+//    }
+    
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
         debugPrint("cellForRowAt indexPath \(indexPath)")
         
         // Create a new cell with prototype cell identifier "CategoryCell"
         // dequeueReusableCell means to reuse a cell that is no longer visible
-        let cell = tableView.dequeueReusableCell(withIdentifier: "CategoryCell", for: indexPath)
+        let cell = tableView.dequeueReusableCell(withIdentifier: "CategoryCell", for: indexPath) as! SwipeTableViewCell
         
         // Configure the cell with the category from the categoryArray at the current indexPath
         cell.textLabel?.text = categories?[indexPath.row].name ?? "No Categories Added Yet"
+        
+        cell.delegate = self
         
         // Return the configured cell
         return cell
@@ -136,6 +147,44 @@ class CategoryViewController: UITableViewController {
         // Present the alert to the user
         present(alert, animated: true, completion: nil)
         
+    }
+    
+}
+
+// MARK: - Swipe Cell Delegate methods
+
+extension CategoryViewController: SwipeTableViewCellDelegate {
+    
+    func tableView(_ tableView: UITableView, editActionsForRowAt indexPath: IndexPath, for orientation: SwipeActionsOrientation) -> [SwipeAction]? {
+        guard orientation == .right else { return nil }
+
+        let deleteAction = SwipeAction(style: .destructive, title: "Delete") { action, indexPath in
+            // handle action by updating model with deletion
+            // We are checking to see if the todoItems array is not nil and if there is an item at the selected indexPath
+            if let categoryForDeletion = self.categories?[indexPath.row] {
+                do {
+                    try self.realm.write {
+                        // This will delete the item from the database
+                        self.realm.delete(categoryForDeletion)
+                    }
+                } catch {
+                    print("Error deleting category, \(error)")
+                }
+            }
+            
+            debugPrint("Item deleted")
+        }
+
+        // customize the action appearance
+        deleteAction.image = UIImage(named: "delete-icon")
+
+        return [deleteAction]
+    }
+    
+    func tableView(_ tableView: UITableView, editActionsOptionsForRowAt indexPath: IndexPath, for orientation: SwipeActionsOrientation) -> SwipeOptions {
+        var options = SwipeOptions()
+        options.expansionStyle = .destructive
+        return options
     }
     
 }

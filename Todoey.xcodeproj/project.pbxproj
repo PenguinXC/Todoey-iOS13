@@ -10,6 +10,7 @@
 		A31117A22DDA3EA400152A0D /* CategoryViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A31117A12DDA3EA400152A0D /* CategoryViewController.swift */; };
 		A3726DB22DDF308A006B5063 /* Item.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3726DB12DDF308A006B5063 /* Item.swift */; };
 		A3726DB42DDF309B006B5063 /* Category.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3726DB32DDF309B006B5063 /* Category.swift */; };
+		A3B9EB0D2DE2488200D562A5 /* SwipeCellKit in Frameworks */ = {isa = PBXBuildFile; productRef = A3B9EB0C2DE2488200D562A5 /* SwipeCellKit */; };
 		A3DD83F82DDCD93800999B9B /* RealmSwift in Frameworks */ = {isa = PBXBuildFile; productRef = A3DD83F72DDCD93800999B9B /* RealmSwift */; };
 		EB2BE4FA239524DB00FB933B /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = EB2BE4F9239524DB00FB933B /* AppDelegate.swift */; };
 		EB2BE4FE239524DB00FB933B /* TodoListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = EB2BE4FD239524DB00FB933B /* TodoListViewController.swift */; };
@@ -49,6 +50,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A3B9EB0D2DE2488200D562A5 /* SwipeCellKit in Frameworks */,
 				A3DD83F82DDCD93800999B9B /* RealmSwift in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -168,6 +170,7 @@
 			mainGroup = EB2BE4ED239524DB00FB933B;
 			packageReferences = (
 				A3DD83F42DDCD93800999B9B /* XCRemoteSwiftPackageReference "realm-swift" */,
+				A3B9EB0B2DE2488200D562A5 /* XCRemoteSwiftPackageReference "SwipeCellKit" */,
 			);
 			productRefGroup = EB2BE4F7239524DB00FB933B /* Products */;
 			projectDirPath = "";
@@ -351,6 +354,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = D5NBNST2MA;
 				INFOPLIST_FILE = Todoey/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -369,6 +373,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = D5NBNST2MA;
 				INFOPLIST_FILE = Todoey/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -406,6 +411,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		A3B9EB0B2DE2488200D562A5 /* XCRemoteSwiftPackageReference "SwipeCellKit" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/SwipeCellKit/SwipeCellKit";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.7.1;
+			};
+		};
 		A3DD83F42DDCD93800999B9B /* XCRemoteSwiftPackageReference "realm-swift" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/realm/realm-swift.git";
@@ -417,6 +430,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		A3B9EB0C2DE2488200D562A5 /* SwipeCellKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A3B9EB0B2DE2488200D562A5 /* XCRemoteSwiftPackageReference "SwipeCellKit" */;
+			productName = SwipeCellKit;
+		};
 		A3DD83F72DDCD93800999B9B /* RealmSwift */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = A3DD83F42DDCD93800999B9B /* XCRemoteSwiftPackageReference "realm-swift" */;
