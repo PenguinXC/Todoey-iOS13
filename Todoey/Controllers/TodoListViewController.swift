@@ -67,6 +67,21 @@ class TodoListViewController: UITableViewController {
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         
+        // We are checking to see if the todoItems array is not nil and if there is an item at the selected indexPath
+        if let item = todoItems?[indexPath.row] {
+            do {
+                try realm.write {
+                    // Toggle the done property of the item
+                    // item.done.toggle()
+                    item.done = !item.done
+                }
+            } catch {
+                print("Error saving done status, \(error)")
+            }
+        }
+        // This will call the cellForRowAt method again to update the cell
+        tableView.reloadData()
+        
         // itemArray[indexPath.row].done = !itemArray[indexPath.row].done
         // Order matters, so we need to set the done property first
         // We need to delete the item from the database first
