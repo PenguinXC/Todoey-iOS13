@@ -73,7 +73,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         
         // Test the configuration (using the already initialized config from static property)
         do {
-            let realm = try Realm(configuration: AppDelegate.config)
+            _ = try Realm(configuration: AppDelegate.config)
             debugPrint("Successfully opened encrypted Realm")
         } catch {
             print("Error initializing Realm, \(error)")

@@ -74,6 +74,8 @@ class TodoListViewController: UITableViewController {
                     // Toggle the done property of the item
                     // item.done.toggle()
                     item.done = !item.done
+                    // This will delete the item from the database
+                    // realm.delete(item)
                 }
             } catch {
                 print("Error saving done status, \(error)")
@@ -81,16 +83,6 @@ class TodoListViewController: UITableViewController {
         }
         // This will call the cellForRowAt method again to update the cell
         tableView.reloadData()
-        
-        // itemArray[indexPath.row].done = !itemArray[indexPath.row].done
-        // Order matters, so we need to set the done property first
-        // We need to delete the item from the database first
-        // context.delete(itemArray[indexPath.row])
-        // then remove it from the array
-        // itemArray.remove(at: indexPath.row)
-        
-        // Save the updated item to the database
-        // saveItems()
         
         // Deselect (remove highlight) the cell after a short delay
         tableView.deselectRow(at: indexPath, animated: true)
@@ -163,26 +155,26 @@ class TodoListViewController: UITableViewController {
 // MARK: - Search Bar methods
 
 //extension TodoListViewController: UISearchBarDelegate {
-//    
+//
 //    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
-//        
+//
 //        // This method is called when the user clicks the search button on the keyboard
 //        let request: NSFetchRequest<Item> = Item.fetchRequest()
-//        
+//
 //        // The predicate is used to filter the data based on the search text
 //        request.predicate = NSPredicate(format: "title CONTAINS[cd] %@", searchBar.text!)
-//        
+//
 //        // The sort descriptor is used to sort the data based on the title property
 //        request.sortDescriptors = [NSSortDescriptor(key: "title", ascending: true)]
-//        
+//
 //        loadItems(with: request, predicate: request.predicate)
 //    }
-//    
+//
 //    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
 //        // If the search text is empty, reload the original data
 //        if searchBar.text?.count == 0 {
 //            loadItems()
-//            
+//
 //            // DispatchQueue is like a manager that assigns tasks to different threads
 //            // Calling DispatchQueue.main.async to ensure that the UI updates are performed on the main thread
 //            // UI updates should always be done on the main thread
