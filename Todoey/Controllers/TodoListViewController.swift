@@ -7,24 +7,22 @@
 //
 
 import UIKit
-import CoreData
+import RealmSwift
 
 class TodoListViewController: UITableViewController {
     
-    var itemArray = [Item]()
+    var todoItems : Results<Item>?
+    
+    let realm = try! Realm(configuration: AppDelegate.config)
+    
     var selectedCategory: Category? {
         // Everything inside didSet will be executed when the selectedCategory is set with a new value
         didSet {
             // Load the items from database when the selected category is set
             // We only call the loadItems method here, because it is certain that the selectedCategory is set before this method is called
-//            loadItems()
+            loadItems()
         }
     }
-    
-    // UIApplication.shared is a singleton object that represents the current application
-    // UIApplication.shared.delegate is used to access the app delegate,
-    // which is a singleton object that manages the app's lifecycle and shared resources
-    let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -36,7 +34,7 @@ class TodoListViewController: UITableViewController {
     // MARK: - TableView Datasource Methods
     
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return itemArray.count
+        return todoItems?.count ?? 1 // if todoItems is nil, return 1. 1 is used to show 1 row with the alert "No Items Added Yet"
     }
     
     // This method is called when the table view needs a cell to display
@@ -49,13 +47,17 @@ class TodoListViewController: UITableViewController {
         let cell = tableView.dequeueReusableCell(withIdentifier: "ToDoItemCell", for: indexPath)
         
         // Get the item from the itemArray at the current indexPath
-        let item = itemArray[indexPath.row]
+        if let item = todoItems?[indexPath.row] {
+            // Configure the cell with the item from the itemArray at the current indexPath
+            cell.textLabel?.text = item.title
+            
+            // Check if the item is marked as done and set the accessory type accordingly
+            cell.accessoryType = item.done ? .checkmark : .none
+        } else {
+            // If there are no items, show a default message
+            cell.textLabel?.text = "No Items Added Yet"
+        }
         
-        // Configure the cell with the item from the itemArray at the current indexPath
-        cell.textLabel?.text = item.title
-        
-        // Check if the item is marked as done and set the accessory type accordingly
-        cell.accessoryType = item.done ? .checkmark : .none
         
         // Return the configured cell
         return cell
@@ -73,7 +75,7 @@ class TodoListViewController: UITableViewController {
         // itemArray.remove(at: indexPath.row)
         
         // Save the updated item to the database
-        saveItems()
+        // saveItems()
         
         // Deselect (remove highlight) the cell after a short delay
         tableView.deselectRow(at: indexPath, animated: true)
@@ -91,17 +93,28 @@ class TodoListViewController: UITableViewController {
         
         // The code of this action will be executed when the user clicks the button on our alert
         let action = UIAlertAction(title: "Add Item", style: .default) { (action) in
-            // We are creating a new item inside the context, it is not saved into the database yet
-//            let newItem = Item(context: self.context)
-//            newItem.title = textField.text!
-//            newItem.done = false
-//            newItem.parentCategory = self.selectedCategory
-//            
-//            self.itemArray.append(newItem)
             
-            // Save the updated item to the database
-            self.saveItems()
+            if let currentCategory = self.selectedCategory {
+                // If the selectedCategory is not nil, we can create a new item
+                // We are creating a new item inside realm write transaction, it will be saved into the database when the transaction is committed
+                do {
+                    try self.realm.write {
+                        // Create a new item and set its title to the text entered in the text field
+                        let newItem = Item()
+                        newItem.title = textField.text!
+                        // newItem.done = false does not need to be set, because it is already set to false by default
+                        // Set the parentCategory of the new item to the selectedCategory
+                        // This is not necessary, because the parentCategory is set automatically when we append the new item to the items array of the selectedCategory
+                        currentCategory.items.append(newItem)
+                        // Add the new item to the realm database, transaction is committed automatically
+                        self.realm.add(newItem)
+                    }
+                } catch {
+                    print("Error saving new item, \(error)")
+                }
+            }
             
+            self.tableView.reloadData()
         }
         
         alert.addTextField { (alertTextField) in
@@ -122,37 +135,13 @@ class TodoListViewController: UITableViewController {
     
     // MARK: - Model Manipulation Methods
     
-    fileprivate func saveItems() {
+    fileprivate func loadItems() {
         
-        do {
-            // Saving the context will save the new item to the database
-            try context.save()
-        } catch {
-            print("Error saving context: \(error)")
-        }
+        // Create a fetch request for the Item object
+        todoItems = selectedCategory?.items.sorted(byKeyPath: "title", ascending: true)
+        
         tableView.reloadData()
     }
-    
-//    fileprivate func loadItems(with request: NSFetchRequest<Item> = Item.fetchRequest(), predicate: NSPredicate? = nil) {
-//        // The request for the Item entity is used as a parameter, it is a prototype of what the data will look like
-//        
-//        let categoryPredicate = NSPredicate(format: "parentCategory.name MATCHES %@", selectedCategory!.name!)
-//        
-//        if let additionalPredicate = predicate {
-//            request.predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [categoryPredicate, additionalPredicate])
-//        } else {
-//            request.predicate = categoryPredicate
-//        }
-//        
-//        do {
-//            // The fetch request is used to retrieve data from the persistent store when calling the fetch method on the context like below
-//            itemArray = try context.fetch(request)
-//        } catch {
-//            print("Error fetching data from context \(error)")
-//        }
-//        
-//        tableView.reloadData()
-//    }
     
 }
 

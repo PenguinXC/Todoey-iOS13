@@ -11,10 +11,7 @@ import RealmSwift
 
 class CategoryViewController: UITableViewController {
     
-    
-    var categories = [Category]()
-    
-    let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
+    var categories : Results<Category>?
     
     // The first time when you create the realm instance, it can fail if the resource is not available
     // In practice, failing to create a realm instance only happens at the first time
@@ -33,7 +30,7 @@ class CategoryViewController: UITableViewController {
     
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         
-        return categories.count
+        return categories?.count ?? 1 // if categories is nil, return 1 to show the alert
     }
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -45,7 +42,7 @@ class CategoryViewController: UITableViewController {
         let cell = tableView.dequeueReusableCell(withIdentifier: "CategoryCell", for: indexPath)
         
         // Configure the cell with the category from the categoryArray at the current indexPath
-        cell.textLabel?.text = categories[indexPath.row].name
+        cell.textLabel?.text = categories?[indexPath.row].name ?? "No Categories Added Yet"
         
         // Return the configured cell
         return cell
@@ -66,13 +63,9 @@ class CategoryViewController: UITableViewController {
     
     func loadCategories() {
         
-//        do {
-//            categories = try context.fetch(request)
-//        } catch {
-//            print("Error fetching data from context \(error)")
-//            
-//        }
-//        tableView.reloadData()
+        categories = realm.objects(Category.self)
+        
+        tableView.reloadData()
     }
     
     // MARK: - Navigation
@@ -90,7 +83,7 @@ class CategoryViewController: UITableViewController {
         // Pass the selected object to the new view controller.
         let destinationVC = segue.destination as! TodoListViewController
         if let indexPath = tableView.indexPathForSelectedRow {
-            destinationVC.selectedCategory = categories[indexPath.row]
+            destinationVC.selectedCategory = categories?[indexPath.row]
         }
     }
     
@@ -108,7 +101,9 @@ class CategoryViewController: UITableViewController {
             // We are creating a new category inside the context, it is not saved into the database yet
             let newCategory = Category()
             newCategory.name = textField.text!
-            self.categories.append(newCategory)
+            
+            // Because categories is a Results object, and Results is a auto-updating container,
+            // we do not need to update the categories array manually
             
             // Save the new category to the database
             self.save(category: newCategory)
