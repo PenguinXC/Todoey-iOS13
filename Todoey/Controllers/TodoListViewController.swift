@@ -34,7 +34,8 @@ class TodoListViewController: UITableViewController {
     // MARK: - TableView Datasource Methods
     
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return todoItems?.count ?? 1 // if todoItems is nil, return 1. 1 is used to show 1 row with the alert "No Items Added Yet"
+        // if todoItems is nil, return 1. 1 is used to show 1 row with the alert "No Items Added Yet"
+        return todoItems?.count ?? 1
     }
     
     // This method is called when the table view needs a cell to display
@@ -101,6 +102,7 @@ class TodoListViewController: UITableViewController {
         // The code of this action will be executed when the user clicks the button on our alert
         let action = UIAlertAction(title: "Add Item", style: .default) { (action) in
             
+            // We need to check if the selectedCategory is not nil and if it is not nil we assign it to currentCategory
             if let currentCategory = self.selectedCategory {
                 // If the selectedCategory is not nil, we can create a new item
                 // We are creating a new item inside realm write transaction, it will be saved into the database when the transaction is committed
@@ -112,11 +114,13 @@ class TodoListViewController: UITableViewController {
                         // newItem.done = false does not need to be set, because it is already set to false by default
                         // Set the parentCategory of the new item to the selectedCategory
                         
+                        // Set the dateCreated property to the current date
                         newItem.dateCreated = Date()
                         // This is not necessary, because the parentCategory is set automatically when we append the new item to the items array of the selectedCategory
                         currentCategory.items.append(newItem)
-                        // Add the new item to the realm database, transaction is committed automatically
-                        self.realm.add(newItem)
+                        // When you append newItem to currentCategory.items, Realm automatically manages the new item since currentCategory is already persisted in the Realm database. The explicit self.realm.add(newItem) call is redundant and can be removed.
+                        // The bidirectional relationship is properly maintained when you add the item to the category's items list - the parentCategory property of the item will automatically reference the category.
+                        // self.realm.add(newItem)
                     }
                 } catch {
                     print("Error saving new item, \(error)")
@@ -147,6 +151,7 @@ class TodoListViewController: UITableViewController {
     fileprivate func loadItems() {
         
         // Create a fetch request for the Item object
+        // This will fetch all items that belong to the selected category and sort them by title in ascending order
         todoItems = selectedCategory?.items.sorted(byKeyPath: "title", ascending: true)
         
         tableView.reloadData()
@@ -160,6 +165,7 @@ extension TodoListViewController: UISearchBarDelegate {
 
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
         
+        // When the search button is clicked, we filter the todoItems based on the search text
         todoItems = todoItems?.filter("title CONTAINS[cd] %@", searchBar.text!).sorted(byKeyPath: "dateCreated", ascending: true)
         
         tableView.reloadData()

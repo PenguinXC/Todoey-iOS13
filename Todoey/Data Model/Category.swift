@@ -9,10 +9,12 @@
 import Foundation
 import RealmSwift
 
+// Category class is subclass of Realm's Object class, this makes it able to be stored in Realm database
 class Category: Object {
     @objc dynamic var name: String = ""
     
-    // forward relationship
+    // Forward relationship
+    // This relationship means that each Category can have multiple items
     let items = List<Item>()
 }
 

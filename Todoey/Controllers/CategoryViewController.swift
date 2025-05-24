@@ -21,7 +21,6 @@ class CategoryViewController: UITableViewController {
         super.viewDidLoad()
         
         // [file:///Users/vuna/Library/Developer/CoreSimulator/Devices/B25FD894-26DD-467E-A9B2-0BD44E97C99B/data/Containers/Data/Application/B2C0EF36-9138-480C-890E-5D3B17A22BF0/Documents/]
-        debugPrint(FileManager.default.urls(for: .documentDirectory, in: .userDomainMask))
         
         loadCategories()
     }
@@ -30,7 +29,8 @@ class CategoryViewController: UITableViewController {
     
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         
-        return categories?.count ?? 1 // if categories is nil, return 1 to show the alert
+        // If categories is nil, return 1 to show a message "No Categories Added Yet"
+        return categories?.count ?? 1
     }
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -52,7 +52,9 @@ class CategoryViewController: UITableViewController {
     
     func save(category: Category) {
         do {
+            // We call realm.write to start a write transaction
             try realm.write {
+                // Add the new category to the realm database, the transaction will be committed automatically
                 realm.add(category)
             }
         } catch {
@@ -63,8 +65,10 @@ class CategoryViewController: UITableViewController {
     
     func loadCategories() {
         
+        // Fetch all categories from the Realm database
         categories = realm.objects(Category.self)
         
+        // Reloading the table view will call all the datasource methods again, including cellForRowAt indexPath and numberOfRowsInSection
         tableView.reloadData()
     }
     
@@ -72,8 +76,11 @@ class CategoryViewController: UITableViewController {
     
     // MARK: - TableView Delegate Methods
     
+    // This method is called when the user selects a row in the table view
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         
+        // Perform a segue to the TodoListViewController
+        // This call to `performSegue` will trigger perform after the prepare(for segue:sender:) method is called
         performSegue(withIdentifier: "goToItems", sender: self)
     }
     
@@ -82,6 +89,8 @@ class CategoryViewController: UITableViewController {
         // Get the new view controller using segue.destination.
         // Pass the selected object to the new view controller.
         let destinationVC = segue.destination as! TodoListViewController
+        
+        // We are passing the selected category (categories?[indexPath.row]) to the TodoListViewController
         if let indexPath = tableView.indexPathForSelectedRow {
             destinationVC.selectedCategory = categories?[indexPath.row]
         }
