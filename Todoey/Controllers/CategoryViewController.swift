@@ -8,9 +8,8 @@
 
 import UIKit
 import RealmSwift
-import SwipeCellKit
 
-class CategoryViewController: UITableViewController {
+class CategoryViewController: SwipeTableViewController {
     
     var categories : Results<Category>?
     
@@ -36,24 +35,13 @@ class CategoryViewController: UITableViewController {
         return categories?.count ?? 1
     }
     
-//    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-//        let cell = tableView.dequeueReusableCell(withIdentifier: "Cell") as! SwipeTableViewCell
-//        cell.delegate = self
-//        return cell
-//    }
-    
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
-        debugPrint("cellForRowAt indexPath \(indexPath)")
-        
-        // Create a new cell with prototype cell identifier "CategoryCell"
-        // dequeueReusableCell means to reuse a cell that is no longer visible
-        let cell = tableView.dequeueReusableCell(withIdentifier: "CategoryCell", for: indexPath) as! SwipeTableViewCell
+        // We will get the cell from the superclass SwipeTableViewController
+        let cell = super.tableView(tableView, cellForRowAt: indexPath)
         
         // Configure the cell with the category from the categoryArray at the current indexPath
         cell.textLabel?.text = categories?[indexPath.row].name ?? "No Categories Added Yet"
-        
-        cell.delegate = self
         
         // Return the configured cell
         return cell
@@ -83,7 +71,23 @@ class CategoryViewController: UITableViewController {
         tableView.reloadData()
     }
     
-    // MARK: - Navigation
+    // MARK: - Delete Data from Swipe
+    // This method will be called when the user swipes left on a cell
+    override func updateModel(at indexPath: IndexPath) {
+        
+        super.updateModel(at: indexPath)
+        // We are checking to see if the todoItems array is not nil and if there is an item at the selected indexPath
+        if let categoryForDeletion = self.categories?[indexPath.row] {
+            do {
+                try self.realm.write {
+                    // This will delete the item from the database
+                    self.realm.delete(categoryForDeletion)
+                }
+            } catch {
+                print("Error deleting category, \(error)")
+            }
+        }
+    }
     
     // MARK: - TableView Delegate Methods
     
@@ -147,44 +151,6 @@ class CategoryViewController: UITableViewController {
         // Present the alert to the user
         present(alert, animated: true, completion: nil)
         
-    }
-    
-}
-
-// MARK: - Swipe Cell Delegate methods
-
-extension CategoryViewController: SwipeTableViewCellDelegate {
-    
-    func tableView(_ tableView: UITableView, editActionsForRowAt indexPath: IndexPath, for orientation: SwipeActionsOrientation) -> [SwipeAction]? {
-        guard orientation == .right else { return nil }
-
-        let deleteAction = SwipeAction(style: .destructive, title: "Delete") { action, indexPath in
-            // handle action by updating model with deletion
-            // We are checking to see if the todoItems array is not nil and if there is an item at the selected indexPath
-            if let categoryForDeletion = self.categories?[indexPath.row] {
-                do {
-                    try self.realm.write {
-                        // This will delete the item from the database
-                        self.realm.delete(categoryForDeletion)
-                    }
-                } catch {
-                    print("Error deleting category, \(error)")
-                }
-            }
-            
-            debugPrint("Item deleted")
-        }
-
-        // customize the action appearance
-        deleteAction.image = UIImage(named: "delete-icon")
-
-        return [deleteAction]
-    }
-    
-    func tableView(_ tableView: UITableView, editActionsOptionsForRowAt indexPath: IndexPath, for orientation: SwipeActionsOrientation) -> SwipeOptions {
-        var options = SwipeOptions()
-        options.expansionStyle = .destructive
-        return options
     }
     
 }
