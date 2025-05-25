@@ -23,8 +23,6 @@ class CategoryViewController: SwipeTableViewController {
         // [file:///Users/vuna/Library/Developer/CoreSimulator/Devices/B25FD894-26DD-467E-A9B2-0BD44E97C99B/data/Containers/Data/Application/B2C0EF36-9138-480C-890E-5D3B17A22BF0/Documents/]
         
         loadCategories()
-        
-        tableView.rowHeight = 80.0
     }
     
     // MARK: - TableView Datasource Methods

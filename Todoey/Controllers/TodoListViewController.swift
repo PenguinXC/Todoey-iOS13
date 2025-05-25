@@ -9,7 +9,7 @@
 import UIKit
 import RealmSwift
 
-class TodoListViewController: UITableViewController {
+class TodoListViewController: SwipeTableViewController {
     
     var todoItems : Results<Item>?
     
@@ -42,10 +42,7 @@ class TodoListViewController: UITableViewController {
     // This method is called initially when the table view is loaded, or when the table view is reloaded
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
-        debugPrint("cellForRowAt indexPath \(indexPath)")
-        
-        // Create a new cell with prototype cell identifier "ToDoItemCell"
-        let cell = tableView.dequeueReusableCell(withIdentifier: "ToDoItemCell", for: indexPath)
+        let cell = super.tableView(tableView, cellForRowAt: indexPath)
         
         // Get the item from the itemArray at the current indexPath
         if let item = todoItems?[indexPath.row] {
@@ -58,7 +55,6 @@ class TodoListViewController: UITableViewController {
             // If there are no items, show a default message
             cell.textLabel?.text = "No Items Added Yet"
         }
-        
         
         // Return the configured cell
         return cell
@@ -155,6 +151,24 @@ class TodoListViewController: UITableViewController {
         todoItems = selectedCategory?.items.sorted(byKeyPath: "title", ascending: true)
         
         tableView.reloadData()
+    }
+    
+    // MARK: - Delete Data from Swipe
+    // This method will be called when the user swipes left on a cell
+    override func updateModel(at indexPath: IndexPath) {
+        
+        super.updateModel(at: indexPath)
+        // We are checking to see if the todoItems array is not nil and if there is an item at the selected indexPath
+        if let itemForDeletion = todoItems?[indexPath.row] {
+            do {
+                try self.realm.write {
+                    // This will delete the item from the database
+                    self.realm.delete(itemForDeletion)
+                }
+            } catch {
+                print("Error deleting category, \(error)")
+            }
+        }
     }
     
 }
